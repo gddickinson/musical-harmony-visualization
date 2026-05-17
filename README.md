@@ -189,3 +189,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Music theory principles from various traditions
 - Synthesis techniques inspired by classic synthesizers
 - Visualization concepts from music theory analysis
+
+
+---
+*Built with AI assistance from [Claude (Anthropic)](https://claude.com/).*
