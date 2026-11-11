@@ -5,11 +5,14 @@ Contains functions for motion trail, harmonic analysis,
 and style-specific chord progression plots.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 
 from theory import Chord, ProgressionStyle
+from harmony_layout import (
+    chord_starts, harmonic_complexity, motion_labels, motion_trail, note_density, pattern_angles,
+    MOTION_LABEL_RADIUS,
+)
 
 
 def create_motion_visualization(
@@ -22,32 +25,18 @@ def create_motion_visualization(
         chords: List of Chord objects.
         filename_base: Base filename for the output PNG.
     """
-    total_duration = sum(chord.duration for chord in chords)
     fig = plt.figure(figsize=(15, 15))
     ax = plt.subplot(111, projection='polar')
 
     # Create motion trails
-    time_points = np.linspace(0, total_duration, 100)
-    for t in time_points:
-        current_time = 0
-        for chord in chords:
-            if current_time <= t < current_time + chord.duration:
-                angle = (t / total_duration) * 2 * np.pi
-                for i, note in enumerate(chord.notes):
-                    radius = 0.3 + i * 0.15
-                    alpha = 1.0 - (t - current_time) / chord.duration
-                    ax.scatter(angle, radius,
-                               color=chord.color, alpha=alpha * 0.3, s=100)
-            current_time += chord.duration
+    for p in motion_trail(chords):
+        ax.scatter(p["angle"], p["radius"],
+                   color=chords[p["chord"]].color, alpha=p["alpha"], s=100)
 
-    # Add chord names and connection lines
-    current_angle = 0
-    for chord in chords:
-        angle = current_angle + (chord.duration / total_duration * np.pi)
-        ax.text(angle, 1.2, chord.name,
-                rotation=np.degrees(angle) - 90,
-                ha='center', va='center')
-        current_angle += (chord.duration / total_duration * 2 * np.pi)
+    # Add chord names
+    for angle, rotation, name in motion_labels(chords):
+        ax.text(angle, MOTION_LABEL_RADIUS, name,
+                rotation=rotation, ha='center', va='center')
 
     ax.set_title('Harmonic Motion Visualization', pad=20)
     plt.savefig(f"{filename_base}_motion.png", dpi=300, bbox_inches='tight')
@@ -88,25 +77,17 @@ def create_advanced_analysis(
 
     # Note density plot
     ax2 = fig.add_subplot(gs[1, 0])
-    note_times = []
-    for chord in chords:
-        note_times.extend([len(chord.notes)] * int(chord.duration * 10))
-    x_vals = np.linspace(0, total_duration, len(note_times))
+    x_vals, note_times = note_density(chords)
     ax2.plot(x_vals, note_times, 'b-', alpha=0.6)
     ax2.fill_between(x_vals, note_times, alpha=0.2)
     ax2.set_title('Note Density Over Time')
 
     # Harmonic complexity
     ax3 = fig.add_subplot(gs[1, 1])
-    complexity = [
-        len(chord.notes) * len(set(note.pitch % 12 for note in chord.notes))
-        for chord in chords
-    ]
-    current_time = 0
-    for i, chord in enumerate(chords):
-        ax3.bar(current_time, complexity[i],
+    complexity = harmonic_complexity(chords)
+    for i, (chord, start) in enumerate(zip(chords, chord_starts(chords))):
+        ax3.bar(start, complexity[i],
                 width=chord.duration, align='edge', color=chord.color, alpha=0.6)
-        current_time += chord.duration
     ax3.set_title('Harmonic Complexity')
 
     # Style-specific analysis (polar panel in the bottom row)
@@ -130,7 +111,7 @@ def _create_style_analysis(
         chords: List of Chord objects.
         style: The ProgressionStyle used.
     """
-    angles = np.linspace(0, 2 * np.pi, len(chords) + 1)[:-1]
+    angles = pattern_angles(chords)
 
     for i, (chord, angle) in enumerate(zip(chords, angles)):
         ax.scatter(angle, len(chord.notes),
