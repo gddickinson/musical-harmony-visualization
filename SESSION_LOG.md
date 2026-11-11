@@ -33,3 +33,13 @@ Open / for George
 - Very short chords crash the Python writers: < 1/960 beat -> MIDIUtil KeyError; < 4 samples -> ADSR broadcast
   error. The web UI limits durations to >= 0.25 beats; a minimum duration in `create_chord` is a design decision.
 - `note_to_midi('B9')` returns 131 (> 127); `create_chord` catches it, `note_to_midi` alone does not.
+
+## 2026-11-11 (follow-up) — range/duration fixes, regenerated examples
+
+- Fixed: `note_to_midi` raises ValueError above MIDI 127 (G#9..B9 returned 128-131); JS engine mirrors it.
+- Fixed: chords shorter than 1/960 beat (one MIDI tick) now raise a clear ValueError in `create_chord`
+  (`theory.MIN_CHORD_DURATION`); the ADSR envelope handles release = 0, so very short WAV chords (< 4 samples) no longer
+  crash. Normal outputs byte-identical. Tests: `tests/test_theory_limits.py`.
+- Regenerated the committed examples with `python main.py --style {classical,impressionist,jazz,modal}` (fixed analysis
+  panel, WAVs at 120 BPM): 22.2 MB -> 14.5 MB for all committed `harmony_*` outputs; MIDI files unchanged.
+  `harmony_output.*` (from the archived v1 script, not producible by the current code) left as is.
