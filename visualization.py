@@ -105,7 +105,7 @@ def create_advanced_analysis(
     current_time = 0
     for i, chord in enumerate(chords):
         ax3.bar(current_time, complexity[i],
-                width=chord.duration, color=chord.color, alpha=0.6)
+                width=chord.duration, align='edge', color=chord.color, alpha=0.6)
         current_time += chord.duration
     ax3.set_title('Harmonic Complexity')
 
