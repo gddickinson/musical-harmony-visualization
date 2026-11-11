@@ -1,12 +1,12 @@
 # Musical Harmony Visualization — Roadmap
 
 ## Current State
-The project has two monolithic scripts (`music-visualizer.py`, `music-visualizer-2.py`) that combine music theory, audio synthesis, MIDI generation, and matplotlib visualization into single files. The code uses good Python patterns (dataclasses, enums, type hints) but everything lives in just two large files with no tests, no packaging, and generated output files committed alongside source code.
+The original monolithic scripts now live in `_archive/`; the code is split into `theory.py`, `synthesis.py`, `visualization.py` and `main.py`, with unit tests. Generated example outputs (`harmony_*.wav/.mid/.png`) are still committed alongside the source.
 
 ## Short-term Improvements
 - [x] Split `music-visualizer-2.py` into focused modules: `theory.py` (Note, Chord, ProgressionStyle), `synthesis.py` (WAV/MIDI generation), `visualization.py` (matplotlib plotting), `main.py` (CLI entry point)
 - [x] Add a `requirements.txt` or `pyproject.toml` with pinned dependencies (numpy, matplotlib, scipy, midiutil)
-- [x] Add `.gitignore` to exclude generated `.wav`, `.mid`, and `.png` files from the repo
+- [ ] Add `.gitignore` to exclude generated `.wav`, `.mid`, and `.png` files from the repo (not done: `.gitignore` only lists `.DS_Store` and example outputs are committed)
 - [x] Add input validation for chord types, note ranges, and duration values in `create_advanced_chord()`
 - [x] Add docstrings to all public methods in `EnhancedHarmonyVisualizer`
 - [x] Add error handling around WAV file writing and MIDI generation

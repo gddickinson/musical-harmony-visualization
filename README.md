@@ -9,14 +9,15 @@ A sophisticated Python-based system that generates, visualizes, and synthesizes 
 - Impressionist (colorful and unconventional harmonies)
 - Modal (sustained harmonies with modal characteristics)
 - Classical (traditional harmonic progressions)
+- Blues (12-bar dominant-seventh progression)
 
 ### Chord Types
 - Major/Minor triads
 - Dominant 7th chords
 - Major/Minor 7th chords
-- Extended chords (9th, 11th, 13th)
-- Diminished and half-diminished
-- Suspended chords
+- Extended chords (major 9th, minor 9th)
+- Diminished, diminished 7th and half-diminished
+- Suspended (sus4) chords
 - Augmented chords
 
 ### Visualization Types
@@ -36,58 +37,55 @@ A sophisticated Python-based system that generates, visualizes, and synthesizes 
 - WAV file synthesis with:
   - Rich overtone structure
   - ADSR envelope shaping
-  - Frequency modulation
+  - Slow amplitude modulation (5 Hz tremolo)
   - Dynamic velocity control
 
 ## Installation
 
 1. Clone this repository:
 ```bash
-git clone [your-repo-url]
-cd musical-harmony-visualizer
+git clone https://github.com/gddickinson/musical-harmony-visualization.git
+cd musical-harmony-visualization
 ```
 
 2. Install required dependencies:
 ```bash
-pip install numpy matplotlib scipy midiutil
+pip install -r requirements.txt
 ```
 
 ## Usage
+
+### Command line
+
+```bash
+python main.py                      # all five styles into the current directory
+python main.py --style jazz --tempo 100 --output-dir out
+```
 
 ### Basic Usage
 
 Generate a single style progression:
 
 ```python
-from harmony_visualizer import EnhancedHarmonyVisualizer, ProgressionStyle
+from theory import ProgressionStyle, create_chord, get_style_progression
+from synthesis import SynthConfig, create_audio_files
+from visualization import create_rich_visualization
 
-# Create visualizer
-visualizer = EnhancedHarmonyVisualizer()
-
-# Generate jazz progression
 style = ProgressionStyle.JAZZ
-progression_data = visualizer.get_style_progression(style)
-chords = [visualizer.create_advanced_chord(root, chord_type, duration) 
-          for root, chord_type, duration in progression_data]
-visualizer.create_rich_visualization(chords, f"harmony_{style.value}", style)
+chords = [create_chord(root, chord_type, duration)
+          for root, chord_type, duration in get_style_progression(style)]
+create_audio_files(chords, f"harmony_{style.value}", SynthConfig(tempo_bpm=120))
+create_rich_visualization(chords, f"harmony_{style.value}", style)
 ```
 
 ### Generate All Styles
 
 ```python
-# Generate all available styles
-styles = [
-    ProgressionStyle.JAZZ,
-    ProgressionStyle.IMPRESSIONIST,
-    ProgressionStyle.MODAL,
-    ProgressionStyle.CLASSICAL
-]
-
-for style in styles:
-    progression_data = visualizer.get_style_progression(style)
-    chords = [visualizer.create_advanced_chord(root, chord_type, duration) 
-              for root, chord_type, duration in progression_data]
-    visualizer.create_rich_visualization(chords, f"harmony_{style.value}", style)
+for style in ProgressionStyle:
+    chords = [create_chord(root, chord_type, duration)
+              for root, chord_type, duration in get_style_progression(style)]
+    create_audio_files(chords, f"harmony_{style.value}")
+    create_rich_visualization(chords, f"harmony_{style.value}", style)
 ```
 
 ## Output Files
@@ -119,27 +117,28 @@ For each generated progression, the system creates:
 ### Creating Custom Progressions
 
 ```python
-# Define custom progression
+# Define custom progression: (root, chord_type, duration in beats)
 custom_progression = [
-    ('C4', 'major7', 2.0),    # (root, chord_type, duration)
+    ('C4', 'major7', 2.0),
     ('A4', 'minor7', 2.0),
     ('D4', 'dominant7', 2.0),
-    ('G4', 'major7', 2.0)
+    ('G4', 'major7', 2.0),
 ]
 
-# Generate visualization
-chords = [visualizer.create_advanced_chord(root, chord_type, duration) 
+chords = [create_chord(root, chord_type, duration)
           for root, chord_type, duration in custom_progression]
-visualizer.create_rich_visualization(chords, "custom_progression")
+create_audio_files(chords, "custom_progression")
+create_rich_visualization(chords, "custom_progression")
 ```
+
+Chord types are the keys of `theory.CHORD_TYPES`; roots are note names with a
+single-digit octave (`C4`, `F#3`, sharps only).
 
 ### Modifying Synthesis Parameters
 
-The synthesis engine can be customized by modifying:
-- Number of overtones
-- ADSR envelope parameters
-- Modulation depth and frequency
-- Overall duration and tempo
+`synthesis.SynthConfig` holds the sample rate, tempo, number of overtones and the
+modulation frequency and depth. The ADSR envelope ratios are module constants in
+`synthesis.py` (`ATTACK_RATIO`, `DECAY_RATIO`, `SUSTAIN_LEVEL`, `RELEASE_RATIO`).
 
 ## Musical Theory
 
@@ -160,14 +159,14 @@ The synthesis engine can be customized by modifying:
 ### Audio Synthesis
 - Sample rate: 44100 Hz
 - Bit depth: 16-bit
-- Synthesis method: Additive with FM
-- Envelope: ADSR with customizable parameters
+- Synthesis method: additive (fundamental + 3 overtones) with 5 Hz amplitude modulation
+- Envelope: ADSR, proportional to each chord's length
+- Timing: chord durations are beats, converted with the tempo (default 120 BPM) for both MIDI and WAV
 
 ### Visualization
 - High-resolution output (300 DPI)
 - Multiple visualization layers
-- Real-time animation capabilities
-- Advanced color mapping
+- One colour per chord type (`theory.CHORD_TYPES`)
 
 ## Contributing
 
