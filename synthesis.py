@@ -162,17 +162,23 @@ def _write_wav_file(
     filename_base: str,
     config: SynthConfig,
 ) -> None:
-    """Write a WAV file for the chord progression."""
-    total_duration = sum(chord.duration for chord in chords)
+    """Write a WAV file for the chord progression.
+
+    Chord durations are in beats; they are converted to seconds with the
+    configured tempo, so the WAV and the MIDI file have the same timing.
+    """
+    seconds_per_beat = 60.0 / config.tempo_bpm
+    total_duration = sum(chord.duration for chord in chords) * seconds_per_beat
     total_samples = int(config.sample_rate * total_duration)
     full_waveform = np.zeros(total_samples)
 
     current_sample = 0
     for chord in chords:
-        chord_duration_samples = int(config.sample_rate * chord.duration)
-        chord_wave = create_enhanced_chord_waveform(chord, chord.duration, config)
-        end_sample = current_sample + len(chord_wave)
-        full_waveform[current_sample:end_sample] += chord_wave
+        seconds = chord.duration * seconds_per_beat
+        chord_duration_samples = int(config.sample_rate * seconds)
+        chord_wave = create_enhanced_chord_waveform(chord, seconds, config)
+        end_sample = min(current_sample + len(chord_wave), total_samples)
+        full_waveform[current_sample:end_sample] += chord_wave[:end_sample - current_sample]
         current_sample += chord_duration_samples
 
     # Normalize and save
