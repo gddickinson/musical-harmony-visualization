@@ -109,8 +109,8 @@ def create_advanced_analysis(
         current_time += chord.duration
     ax3.set_title('Harmonic Complexity')
 
-    # Style-specific analysis
-    ax4 = fig.add_subplot(gs[2, :])
+    # Style-specific analysis (polar panel in the bottom row)
+    ax4 = fig.add_subplot(gs[2, :], projection='polar')
     _create_style_analysis(ax4, chords, style)
 
     plt.tight_layout()
@@ -126,12 +126,11 @@ def _create_style_analysis(
     """Create style-specific analysis visualization on a polar subplot.
 
     Args:
-        ax: Matplotlib axes (will be replaced with polar subplot).
+        ax: Matplotlib polar axes to draw on.
         chords: List of Chord objects.
         style: The ProgressionStyle used.
     """
     angles = np.linspace(0, 2 * np.pi, len(chords) + 1)[:-1]
-    ax = plt.subplot(111, projection='polar')
 
     for i, (chord, angle) in enumerate(zip(chords, angles)):
         ax.scatter(angle, len(chord.notes),
