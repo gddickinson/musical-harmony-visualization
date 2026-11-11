@@ -14,6 +14,7 @@ from enum import Enum
 A4_FREQUENCY = 440.0
 A4_MIDI_PITCH = 69
 SEMITONES_PER_OCTAVE = 12
+MAX_MIDI_PITCH = 127
 
 
 class ProgressionStyle(Enum):
@@ -74,7 +75,7 @@ def note_to_midi(note_name: str) -> int:
         MIDI pitch number (0-127).
 
     Raises:
-        ValueError: If the note name is invalid.
+        ValueError: If the note name is invalid or above MIDI 127 (G9).
     """
     if len(note_name) < 2:
         raise ValueError(f"Invalid note name: {note_name}")
@@ -90,7 +91,10 @@ def note_to_midi(note_name: str) -> int:
 
     octave = int(octave_str)
     pitch_class = NOTE_NAMES.index(note)
-    return pitch_class + (octave + 1) * SEMITONES_PER_OCTAVE
+    pitch = pitch_class + (octave + 1) * SEMITONES_PER_OCTAVE
+    if pitch > MAX_MIDI_PITCH:
+        raise ValueError(f"Note {note_name} (pitch {pitch}) is outside the MIDI range 0-{MAX_MIDI_PITCH}")
+    return pitch
 
 
 def create_chord(root: str, chord_type: str, duration: float) -> Chord:

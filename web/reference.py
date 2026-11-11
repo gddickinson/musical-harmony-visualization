@@ -127,7 +127,7 @@ def reference_cases() -> Dict:
 def note_to_midi_reference() -> Dict:
     """theory.note_to_midi on valid and invalid names (None = ValueError)."""
     out = {}
-    for name in ["C0", "B9", "C#4", "F#3", "A4", "G#2", "X4", "C", "CA", "Db4", "C10", "c4", ""]:
+    for name in ["C0", "G9", "G#9", "B9", "C#4", "F#3", "A4", "G#2", "X4", "C", "CA", "Db4", "C10", "c4", ""]:
         try:
             out[name] = note_to_midi(name)
         except ValueError:

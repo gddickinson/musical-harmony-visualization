@@ -24,7 +24,9 @@ export class Theory {
     if (!/^[0-9]$/.test(oct)) throw new Error(`Invalid octave in note name: ${name}`);
     const pc = this.noteNames.indexOf(note);
     if (pc < 0) throw new Error(`Unknown note: ${note}`);
-    return pc + (Number(oct) + 1) * this.data.semitones_per_octave;
+    const pitch = pc + (Number(oct) + 1) * this.data.semitones_per_octave;
+    if (pitch > 127) throw new Error(`Note ${name} (pitch ${pitch}) is outside the MIDI range 0-127`);
+    return pitch;
   }
 
   midiToName(pitch) {
