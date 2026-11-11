@@ -112,6 +112,36 @@ For each generated progression, the system creates:
    - Note density analysis
    - Style-specific pattern analysis
 
+## Web interface
+
+**Live site: https://gddickinson.github.io/musical-harmony-visualization/** (static, runs entirely in your browser).
+
+The static site is the working program: JavaScript ports of `theory.py`, `harmony_layout.py` (the geometry behind
+`visualization.py`) and `synthesis.py`, checked against the Python output. Pick a style or build your own progression,
+watch the harmonic-motion circle and the analysis panels redraw, play it (WebAudio, only after you press Play) and
+download the same WAV and MIDI files `python main.py` writes (byte-identical for the presets).
+
+| Page | What it does |
+|------|--------------|
+| Studio | Style presets or a custom progression; tempo, overtones, modulation, sample rate; motion circle, pattern, progression, density and complexity panels; Play, WAV, MIDI; with the local server, the real matplotlib PNGs |
+| Chords | All 12 chord types on any root: keyboard, MIDI pitches, frequencies, velocities, waveform, play |
+| Verify | The JS engine against `tests/fixtures/harmony_reference.json` (chords, plot geometry, samples, WAV header, MIDI bytes); locally, your own progression against Python |
+
+![Home](docs/img/home.png)
+![Studio](docs/img/studio.png)
+![Chords](docs/img/chords.png)
+![Verify](docs/img/verify.png)
+
+### Run the web app
+
+```bash
+pip install -r requirements-web.txt
+python run_web.py                     # http://127.0.0.1:8165
+python -m pytest -q tests/ test_theory.py
+python scripts/build_static.py        # static site in site/ (published by .github/workflows/pages.yml)
+python scripts/make_fixture.py        # regenerate the Python reference after changing theory/synthesis/layout
+```
+
 ## Customization
 
 ### Creating Custom Progressions

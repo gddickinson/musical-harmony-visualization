@@ -5,6 +5,8 @@ Contains waveform creation with overtones, ADSR envelopes,
 and file export for both MIDI and WAV formats.
 """
 
+import io
+
 import numpy as np
 from typing import List
 from dataclasses import dataclass
@@ -132,12 +134,10 @@ def create_audio_files(
     _write_wav_file(chords, filename_base, config)
 
 
-def _write_midi_file(
-    chords: List[Chord],
-    filename_base: str,
-    config: SynthConfig,
-) -> None:
-    """Write a MIDI file for the chord progression."""
+def build_midi_bytes(chords: List[Chord], config: SynthConfig = None) -> bytes:
+    """Return the Standard MIDI File bytes for the chord progression (durations in beats)."""
+    if config is None:
+        config = SynthConfig()
     midi = MIDIFile(1)
     track = 0
     time = 0
@@ -150,23 +150,19 @@ def _write_midi_file(
                          chord.duration, note.velocity)
         current_time += chord.duration
 
-    try:
-        with open(f"{filename_base}.mid", "wb") as f:
-            midi.writeFile(f)
-    except IOError as e:
-        raise IOError(f"Failed to write MIDI file: {e}") from e
+    buf = io.BytesIO()
+    midi.writeFile(buf)
+    return buf.getvalue()
 
 
-def _write_wav_file(
-    chords: List[Chord],
-    filename_base: str,
-    config: SynthConfig,
-) -> None:
-    """Write a WAV file for the chord progression.
+def render_progression(chords: List[Chord], config: SynthConfig = None) -> np.ndarray:
+    """Render the chord progression to float samples clipped to [-1, 1].
 
     Chord durations are in beats; they are converted to seconds with the
     configured tempo, so the WAV and the MIDI file have the same timing.
     """
+    if config is None:
+        config = SynthConfig()
     seconds_per_beat = 60.0 / config.tempo_bpm
     total_duration = sum(chord.duration for chord in chords) * seconds_per_beat
     total_samples = int(config.sample_rate * total_duration)
@@ -181,14 +177,41 @@ def _write_wav_file(
         full_waveform[current_sample:end_sample] += chord_wave[:end_sample - current_sample]
         current_sample += chord_duration_samples
 
-    # Normalize and save
-    full_waveform = np.clip(full_waveform, -1, 1)
+    return np.clip(full_waveform, -1, 1)
+
+
+def to_int16(waveform: np.ndarray) -> np.ndarray:
+    """Convert clipped float samples to 16-bit PCM as written to the WAV file."""
+    return (waveform * 32767).astype(np.int16)
+
+
+def _write_midi_file(
+    chords: List[Chord],
+    filename_base: str,
+    config: SynthConfig,
+) -> None:
+    """Write a MIDI file for the chord progression."""
+    data = build_midi_bytes(chords, config)
+    try:
+        with open(f"{filename_base}.mid", "wb") as f:
+            f.write(data)
+    except IOError as e:
+        raise IOError(f"Failed to write MIDI file: {e}") from e
+
+
+def _write_wav_file(
+    chords: List[Chord],
+    filename_base: str,
+    config: SynthConfig,
+) -> None:
+    """Write a 16-bit mono WAV file for the chord progression."""
+    full_waveform = render_progression(chords, config)
 
     try:
         wavfile.write(
             f"{filename_base}.wav",
             config.sample_rate,
-            (full_waveform * 32767).astype(np.int16),
+            to_int16(full_waveform),
         )
     except IOError as e:
         raise IOError(f"Failed to write WAV file: {e}") from e

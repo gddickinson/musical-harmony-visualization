@@ -1,0 +1,28 @@
+/* Harmony accents (amber / violet / teal) and page styles. */
+:root { --accent:#ffb547; --accent2:#b98bff; --accent3:#3de0d0; --glow:rgba(255,181,71,.14); }
+button, .btn, .seg button.on { color:#170c00; }
+.hero.two { align-items:center; }
+.fig { margin:0; }
+.fig canvas, .plot { width:100%; height:auto; display:block; border:1px solid var(--line); border-radius:6px; background:#070914; }
+.plots2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.plots2 figure, .plotfig { margin:0; }
+figcaption { font-size:13px; color:var(--mute); margin:4px 0 10px; }
+.ctlgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:4px 16px; }
+.prog td, .prog th { padding:4px 6px; vertical-align:middle; }
+.prog select, .prog input { padding:5px 6px; font-size:13px; }
+.prog td.num { width:60px; color:var(--mute); font:12px var(--mono); }
+.prog button { margin:0; padding:5px 9px; }
+.prog .sw { display:inline-block; width:12px; height:12px; border-radius:2px; vertical-align:middle; }
+.bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:10px 0; }
+.bar button, .bar .btn { margin:0; }
+.status { font:13px var(--mono); color:var(--mute); min-height:1.6em; }
+.types { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:6px; }
+.types button { margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1px var(--line); text-transform:none; letter-spacing:0; font-weight:500; text-align:left; }
+.types button.on { box-shadow:inset 0 0 0 2px var(--accent); color:var(--accent); }
+.types .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; }
+.kbd { width:100%; height:auto; display:block; border-radius:4px; }
+.figs img { width:100%; height:auto; border:1px solid var(--line); border-radius:6px; background:#fff; }
+td.ok { color:var(--good); } td.err { color:var(--bad); }
+.door b { color:var(--accent); }
+@media (max-width:760px) { .plots2 { grid-template-columns:1fr; } }
+.figs img { max-width:760px; display:block; margin:0 auto 14px; }
