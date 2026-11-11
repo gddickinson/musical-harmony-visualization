@@ -15,6 +15,10 @@ A4_FREQUENCY = 440.0
 A4_MIDI_PITCH = 69
 SEMITONES_PER_OCTAVE = 12
 MAX_MIDI_PITCH = 127
+# Shortest chord (in beats): one tick of the MIDI file (MIDIUtil writes 960 ticks per beat). Shorter chords
+# round to zero ticks and cannot be written as MIDI notes.
+MIDI_TICKS_PER_BEAT = 960
+MIN_CHORD_DURATION = 1 / MIDI_TICKS_PER_BEAT
 
 
 class ProgressionStyle(Enum):
@@ -103,7 +107,7 @@ def create_chord(root: str, chord_type: str, duration: float) -> Chord:
     Args:
         root: Root note name, e.g. 'C4'.
         chord_type: Chord type key from CHORD_TYPES.
-        duration: Duration in beats.
+        duration: Duration in beats (at least MIN_CHORD_DURATION = 1/960 beat).
 
     Returns:
         A Chord instance.
@@ -129,6 +133,10 @@ def create_chord(root: str, chord_type: str, duration: float) -> Chord:
 
     if duration <= 0:
         raise ValueError(f"Duration must be positive, got {duration}")
+    if duration < MIN_CHORD_DURATION:
+        raise ValueError(
+            f"Duration must be at least 1/{MIDI_TICKS_PER_BEAT} beat (one MIDI tick), got {duration}"
+        )
 
     notes = []
     for i, interval in enumerate(intervals):

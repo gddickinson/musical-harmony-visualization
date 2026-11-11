@@ -18,7 +18,7 @@ from theory import (A4_FREQUENCY, A4_MIDI_PITCH, CHORD_TYPES, NOTE_NAMES, SEMITO
                     create_chord, get_style_progression, note_to_midi)
 
 WAVE_STRIDE = 4001          # keep every n-th sample of a full progression
-ADSR_SIZES = [4, 10, 101, 1000, 4410]
+ADSR_SIZES = [1, 3, 4, 10, 101, 1000, 4410]
 
 Progression = Sequence[Tuple[str, str, float]]
 

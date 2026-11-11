@@ -41,6 +41,7 @@ export class Theory {
     const maxPitch = rootMidi + Math.max(...ct.intervals);
     if (maxPitch > 127 || rootMidi < 0) throw new Error(`Chord pitches out of valid MIDI range (0-127): root=${rootMidi}, max=${maxPitch}`);
     if (!(duration > 0)) throw new Error(`Duration must be positive, got ${duration}`);
+    if (duration < 1 / 960) throw new Error(`Duration must be at least 1/960 beat (one MIDI tick), got ${duration}`);
     const notes = ct.intervals.map((iv, i) => {
       const pitch = rootMidi + iv;
       return { pitch, duration, velocity: Math.max(1, 100 - i * 5), frequency: this.frequency(pitch) };

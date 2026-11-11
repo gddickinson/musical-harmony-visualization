@@ -104,10 +104,11 @@ def _create_adsr_envelope(samples: int) -> np.ndarray:
     envelope[:attack] = np.linspace(0, 1, attack)
     # Decay
     envelope[attack:attack + decay] = np.linspace(1, SUSTAIN_LEVEL, decay)
-    # Sustain
-    envelope[attack + decay:-release] = SUSTAIN_LEVEL
+    # Sustain (up to the release; slice end written explicitly so release == 0 works)
+    envelope[attack + decay:samples - release] = SUSTAIN_LEVEL
     # Release
-    envelope[-release:] = np.linspace(SUSTAIN_LEVEL, 0, release)
+    if release > 0:
+        envelope[samples - release:] = np.linspace(SUSTAIN_LEVEL, 0, release)
 
     return envelope
 
